@@ -1,5 +1,6 @@
 import {App, AppRateLimitedEvent} from '@slack/bolt'
 import dotenv from 'dotenv'
+import {sampleBlock} from './views/SampleBlock.jsx'
 
 const config = dotenv.config().parsed
 
@@ -22,10 +23,10 @@ app.event('reaction_added', async ({event, context, logger}) => {
     try {
         const result = await app.client.chat.postMessage({
             channel: 'C0325RRU6GM',
-            text: `Welcome to the team, <@${event.user}>! 🎉`,
+            // @ts-ignore
+            blocks: sampleBlock({name: event.user}),
         });
         logger.info(result)
-        // logger.info(result)
     } catch (error) {
         logger.error(error)
     }
