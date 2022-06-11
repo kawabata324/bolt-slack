@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
+    "start": "./node_modules/.bin/nodemon",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -16,5 +16,8 @@
     "jsx-slack": "^4.6.1",
     "ts-node": "^10.8.1",
     "typescript": "^4.7.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.16"
   }
 }

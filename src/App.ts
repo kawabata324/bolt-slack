@@ -1,6 +1,6 @@
 import {App, AppRateLimitedEvent} from '@slack/bolt'
 import dotenv from 'dotenv'
-import {sampleBlock} from './views/SampleBlock.jsx'
+import {sampleBlock} from './Views'
 
 const config = dotenv.config().parsed
 
