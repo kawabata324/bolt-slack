@@ -19,22 +19,193 @@ const app = new App({
     port: 8000
 });
 
-app.event('reaction_added', async ({event, context, logger}) => {
+app.command("/create_pr", async ({command, ack, context}) => {
+    await ack();
+
     try {
-        const result = await app.client.chat.postMessage({
-            channel: 'C0325RRU6GM',
-            // @ts-ignore
-            blocks: sampleBlock({name: event.user}),
+        const result = await app.client.views.open({
+            token: context.botToken,
+            trigger_id: command.trigger_id,
+            view: {
+                type: "modal",
+                // NOTE: submitからcallback idをとりたい場合はここに定義する
+                callback_id: "submit_modal",
+                title: {
+                    type: "plain_text",
+                    text: "PRのReview依頼するメッセージを作成する",
+                    emoji: true,
+                },
+                submit: {
+                    type: "plain_text",
+                    text: "送信する",
+                    emoji: true,
+                },
+                close: {
+                    type: "plain_text",
+                    text: "キャンセル",
+                    emoji: true,
+                },
+                blocks: [
+                    {
+                        type: "divider",
+                    },
+                    {
+                        type: "section",
+                        text: {
+                            type: "plain_text",
+                            text: "PRの題名とURLを入力してください",
+                            emoji: true,
+                        },
+                    },
+                    {
+                        type: "input",
+                        block_id: "text_input",
+                        element: {
+                            type: "plain_text_input",
+                            action_id: "title"
+                        },
+                        label: {
+                            type: "plain_text",
+                            text: "Title",
+                            emoji: true
+                        }
+                    },
+                    {
+                        type: "input",
+                        block_id: "url_input",
+                        element: {
+                            type: "plain_text_input",
+                            action_id: "url",
+                        },
+                        label: {
+                            type: "plain_text",
+                            text: "URL",
+                            emoji: true,
+                        },
+                    },
+                ],
+            },
         });
-        logger.info(result)
+        console.log(result);
     } catch (error) {
-        logger.error(error)
+        console.log(error);
     }
 });
 
-(async () => {
-    // アプリを起動します
-    await app.start();
+app.command("/finish_work", async ({command, ack, context}) => {
+    await ack()
 
-    console.log('⚡️ Bolt app is running!');
-})();
+    const result = await app.client.views.open({
+        token: context.botToken,
+        trigger_id: command.trigger_id,
+        view: {
+            type: "modal",
+            // NOTE: submitからcallback idをとりたい場合はここに定義する
+            callback_id: "finish_work",
+            title: {
+                type: "plain_text",
+                text: "仕事の完了",
+                emoji: true,
+            },
+            submit: {
+                type: "plain_text",
+                text: "送信する",
+                emoji: true,
+            },
+            close: {
+                type: "plain_text",
+                text: "キャンセル",
+                emoji: true,
+            },
+            blocks: [
+                {
+                    type: "divider",
+                },
+                {
+                    type: "section",
+                    text: {
+                        type: "plain_text",
+                        text: "何曜日か選択してください",
+                        emoji: true,
+                    },
+                },
+                {
+                    type: "input",
+                    block_id: "static_select",
+                    element: {
+                        type: "static_select",
+                        action_id: "weekday",
+                        placeholder: {
+                            type: "plain_text",
+                            text: "Select day",
+                            emoji: true
+                        },
+                        options: [
+                            {
+                                text: {
+                                    type: "plain_text",
+                                    text: "月曜日",
+                                    emoji: true
+                                },
+                                value: "monday"
+                            },
+                            {
+                                text: {
+                                    type: "plain_text",
+                                    text: "火曜日",
+                                    emoji: true
+                                },
+                                value: "tuesday"
+                            },
+                            {
+                                text: {
+                                    type: "plain_text",
+                                    text: "木曜日",
+                                    emoji: true
+                                },
+                                value: "thursday"
+                            }
+                        ],
+                    },
+                    label: {
+                        type: "plain_text",
+                        text: "曜日",
+                        emoji: true
+                    }
+                },
+            ],
+        },
+    })
+})
+
+
+    app.view("submit_modal", async ({ack, view, body, client}) => {
+        await ack();
+
+        const url =
+            view["state"]["values"]["url_input"]["url"]["value"];
+        const title =
+            view["state"]["values"]["text_input"]["title"]["value"];
+
+
+        if (url && title) {
+            try {
+                await client.chat.postMessage({
+                    channel: 'C03K9QCE68K',
+                    text: `お疲れさまです！
+${title}が一通り完了しましたので、PRを作成しました！
+${url}
+お手すきの際にご確認とReviewよろしくお願いします！`,
+                });
+            } catch (error) {
+                console.error(error);
+            }
+        }
+    });
+
+    (async () => {
+        // アプリを起動します
+        await app.start();
+
+        console.log('⚡️ Bolt app is running!');
+    })();
